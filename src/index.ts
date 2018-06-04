@@ -177,22 +177,22 @@ export = class Wire extends EventEmitter {
 
   _handshakeResult () {
     return new Promise((resolve, reject) => {
-      this.once("handshake", (info) => {
+      this.once("handshake", (info: any) => {
         resolve(info)
       })
-      this.once("handshakeFailed", (info) => {
+      this.once("handshakeFailed", (info: any) => {
         process.nextTick(() => { // don't close until wire end received handshakeFailed event.
           if (this.conn) this.conn.close(1008) // FIXME: [ts] Object is possibly "null".
         })
         reject(info)
       })
-      this.once("refused", (info) => {
+      this.once("refused", (info: any) => {
         reject(info)
       })
-      this.once("reset", (info) => {
+      this.once("reset", (info: any) => {
         reject(info)
       })
-      this.once("closed", (info) => {
+      this.once("closed", (info: any) => {
         reject(info)
       })
     })
