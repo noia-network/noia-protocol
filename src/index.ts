@@ -114,7 +114,7 @@ export = class Wire extends EventEmitter {
       if (error.error) {
         error = error.error // FIXME: check why sometimes ErrorEvent emited.
       }
-      if (!["ECONNREFUSED", "ECONNRESET", "EAI_AGAIN"].includes(error.code)) {
+      if (!["ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "EAI_AGAIN"].includes(error.code)) {
         throw new Error(error.message)
       }
     }
