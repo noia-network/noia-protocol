@@ -12,6 +12,7 @@ function noop() {}
 enum Actions {
   HANDSHAKE = "HANDSHAKE",
   UPLOADED = "UPLOADED",
+  METADATA = "METADATA",
   CLEAR = "CLEAR",
   CLEARED = "CLEARED",
   CACHE = "CACHE",
@@ -211,6 +212,22 @@ export = class Wire extends EventEmitter {
       timestamp: Date.now()
     })
   }
+
+  metadata (params: { [key: string]: any }) {
+    const self = this
+  
+    if (!self.ready) {
+      throw new Error("not ready. Forgot handshake?")
+    }
+  
+    // Make sure action and timestamp is not overwritten by accident.
+    const metadata = Object.assign(params, {
+      action: Actions.METADATA,
+      timestamp: Date.now()
+    })
+
+    self._send(metadata)
+  }
   
   cleared (infoHash: string) {
     const self = this
@@ -372,6 +389,8 @@ export = class Wire extends EventEmitter {
         return self._onHandshake(params)
       case Actions.UPLOADED:
         return self._onUploaded(params)
+      case Actions.METADATA:
+        return self._onMetadata(params)
       case Actions.CLEAR:
         return self._onClear(params)
       case Actions.CLEARED:
@@ -500,6 +519,12 @@ export = class Wire extends EventEmitter {
     const self = this
   
     self.emit("uploaded", params)
+  }
+
+  _onMetadata (params: any) {
+    const self = this
+
+    self.emit("metadata", params)
   }
   
   _onCleared (params: any) {

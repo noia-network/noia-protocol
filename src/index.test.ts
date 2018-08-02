@@ -131,6 +131,41 @@ describe("messages from node", () => {
     })
   })
 
+
+  it("metadata", (done) => {
+    const params = {
+      param1: "param1Val",
+      param2: 2
+    }
+
+    const masterHandshake = jest.fn()
+    const nodeHandshake = jest.fn()
+    expect.assertions(6)
+
+    _connection((ws) => {
+      const masterWire = new Wire(ws)
+      masterWire.on("handshake", masterHandshake)
+      masterWire.on("metadata", (info: any) => {
+        expect(nodeHandshake).toHaveBeenCalled()
+        expect(masterHandshake).toHaveBeenCalled()
+        expect(info.action).toBe(Wire.Actions.METADATA)
+        expect(info.param1).toBe(params.param1)
+        expect(info.param2).toBe(params.param2)
+        expect(info.timestamp).toBeLessThanOrEqual(Date.now())
+        _closeAll(done)
+      })
+    })
+
+    _listen(() => {
+      const nodeWire = new Wire(masterAddress)
+      nodeWire.on("handshake", nodeHandshake)
+      nodeWire.handshake()
+        .then(() => {
+          nodeWire.metadata(params)
+        })
+    })
+  })
+
   test.skip("cached", (done) => {
     const cacheUrl = "http://example.com/image.jpg"
     const cacheSize = 321
