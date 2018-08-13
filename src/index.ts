@@ -159,12 +159,12 @@ export = class Wire extends EventEmitter {
   }
   
   // TODO: refactor.
-  handshake () {
+  handshake (params?: any) {
     if (this.connected) {
-      this._handshake()
+      this._handshake(params)
     } else {
       this.on("connected", () => {
-        this._handshake()
+        this._handshake(params)
       })
     }
     return this._handshakeResult()
@@ -426,10 +426,11 @@ export = class Wire extends EventEmitter {
   
   // Outpound
   
-  _handshake () {
+  _handshake (params: any) {
     const self = this
   
     const data = {
+      params: params,
       action: Actions.HANDSHAKE,
       status: Handshake.SENT,
       msg: self.msg,
