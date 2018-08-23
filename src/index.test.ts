@@ -283,7 +283,7 @@ describe("messages from master", () => {
     _listen(() => {
       const nodeWire = new Wire(masterAddress);
       nodeWire.handshakeResult().then((info: any) => {
-          expect(info.params.externalIP).toBe(externalIp);
+        expect(info.params.externalIP).toBe(externalIp);
         _closeAll(done);
       });
     });
@@ -333,7 +333,7 @@ describe("messages from master", () => {
       masterWire.on("handshake", () => {
         masterHandshake();
 
-        masterWire.warning(Wire.WARNING_MSG_ID.OLD_NODE_VERSION);
+        masterWire.warning(Wire.WARNING_MSG_ID.WEBRTC_TEST_FAILED);
       });
     });
     _listen(() => {
@@ -342,9 +342,9 @@ describe("messages from master", () => {
       nodeWire.handshake().then(() => {
         nodeWire.on("warning", (info: any) => {
           expect(info.action).toBe(Wire.Actions.WARNING);
-          expect(info.messageId).toBe(Wire.WARNING_MSG_ID.OLD_NODE_VERSION);
+          expect(info.messageId).toBe(Wire.WARNING_MSG_ID.WEBRTC_TEST_FAILED);
           expect(info.message).toBe(
-            Wire.WARNING_MSG[Wire.WARNING_MSG_ID.OLD_NODE_VERSION]
+            Wire.WARNING_MSG[Wire.WARNING_MSG_ID.WEBRTC_TEST_FAILED]
           );
           expect(info.timestamp).toBeGreaterThanOrEqual(startTimestamp);
 

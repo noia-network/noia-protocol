@@ -1,57 +1,57 @@
 {
-    "name": "@noia-network/protocol",
-    "version": "0.3.3",
-    "description": "",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "test": "jest",
-        "watch-jest": "jest --watch",
-        "build": "npm run build-ts",
-        "build-ts": "tsc",
-        "watch-ts": "tsc -w",
-        "prepublishOnly": "rimraf ./dist/**/*.test.*"
+  "name": "@noia-network/protocol",
+  "version": "0.3.4",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "watch-jest": "jest --watch",
+    "build": "npm run build-ts",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "prepublishOnly": "rimraf ./dist/**/*.test.*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noia-network/noia-protocol.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "NOIA Network Limited"
+  },
+  "license": "LGPL-2.1",
+  "homepage": "https://github.com/noia-network/noia-protocol",
+  "devDependencies": {
+    "@types/jest": "^22.2.3",
+    "jest": "^22.4.2",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^22.4.5",
+    "typescript": "^2.8.3"
+  },
+  "dependencies": {
+    "@types/ws": "^5.1.1",
+    "debug": "^3.1.0",
+    "tslib": "^1.9.2",
+    "ws": "^5.1.1"
+  },
+  "files": [
+    "dist",
+    "**/*.md",
+    "!/examples"
+  ],
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
     },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/noia-network/noia-protocol.git"
-    },
-    "keywords": [],
-    "author": {
-        "name": "NOIA Network Limited"
-    },
-    "license": "LGPL-2.1",
-    "homepage": "https://github.com/noia-network/noia-protocol",
-    "devDependencies": {
-        "@types/jest": "^22.2.3",
-        "jest": "^22.4.2",
-        "rimraf": "^2.6.2",
-        "ts-jest": "^22.4.5",
-        "typescript": "^2.8.3"
-    },
-    "dependencies": {
-        "@types/ws": "^5.1.1",
-        "debug": "^3.1.0",
-        "tslib": "^1.9.2",
-        "ws": "^5.1.1"
-    },
-    "files": [
-        "dist",
-        "**/*.md",
-        "!/examples"
-    ],
-    "jest": {
-        "transform": {
-            "^.+\\.tsx?$": "ts-jest"
-        },
-        "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-        "moduleFileExtensions": [
-            "ts",
-            "tsx",
-            "js",
-            "jsx",
-            "json",
-            "node"
-        ]
-    }
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
 }
