@@ -386,6 +386,38 @@ describe("messages from master", () => {
     });
   });
 
+  test("work order", done => {
+    const workOrderAddress = "0xf911adaf4461a8fc3f4f5d8e2faaeba5d8e3891b";
+
+    const masterHandshake = jest.fn();
+    const nodeHandshake = jest.fn();
+    expect.assertions(6);
+
+    _connection(ws => {
+      const masterWire = new Wire(ws);
+      masterWire.on("handshake", () => {
+        masterHandshake();
+        masterWire.workOrder(workOrderAddress);
+      });
+    });
+
+    _listen(() => {
+      const nodeWire = new Wire(masterAddress);
+      nodeWire.on("handshake", nodeHandshake);
+      nodeWire.handshake().then(() => {
+        nodeWire.on("workOrder", (info: any) => {
+          expect(nodeHandshake).toHaveBeenCalled();
+          expect(masterHandshake).toHaveBeenCalled();
+          expect(info.action).toBe(Wire.Actions.WORK_ORDER);
+          expect(info.address).toBe(workOrderAddress);
+          expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+          expect(info.timestamp).toBeGreaterThanOrEqual(startTimestamp);
+          _closeAll(done);
+        });
+      });
+    });
+  });
+
   test("seed", done => {
     const metadata = {
       infoHash: "123456789123456789",
