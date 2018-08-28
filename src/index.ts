@@ -20,6 +20,7 @@ enum Actions {
   SEED = "SEED",
   SEEDING = "SEEDING",
   WARNING = "WARNING",
+  WORK_ORDER = "WORK_ORDER",
   REQUESTED = "REQUESTED",
   RESPONSE = "RESPONSE"
 }
@@ -367,6 +368,22 @@ export = class Wire extends EventEmitter {
     self._send(data);
   }
 
+  workOrder(address: string) {
+    const self = this;
+
+    if (!self.ready) {
+      throw new Error("not ready. Forgot handshake?");
+    }
+
+    const data = {
+      action: Actions.WORK_ORDER,
+      address: address,
+      timestamp: Date.now()
+    };
+
+    self._send(data);
+  }
+
   requested(piece: number, infoHash: string) {
     const self = this;
 
@@ -424,6 +441,8 @@ export = class Wire extends EventEmitter {
         return self._onSeeding(params);
       case Actions.WARNING:
         return self._onWarning(params);
+      case Actions.WORK_ORDER:
+        return self._onWorkOrder(params);
       case Actions.REQUESTED:
         return self._onRequested(params);
       case Actions.RESPONSE:
@@ -601,6 +620,12 @@ export = class Wire extends EventEmitter {
     const self = this;
 
     self.emit("warning", params);
+  }
+
+  _onWorkOrder(params: any) {
+    const self = this;
+
+    self.emit("workOrder", params);
   }
 
   _onRequested(params: any) {
