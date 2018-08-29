@@ -13,6 +13,7 @@ enum Actions {
   HANDSHAKE = "HANDSHAKE",
   UPLOADED = "UPLOADED",
   METADATA = "METADATA",
+  SIGNED_REQUEST = "SIGNED_REQUEST",
   CLEAR = "CLEAR",
   CLEARED = "CLEARED",
   CACHE = "CACHE",
@@ -249,6 +250,22 @@ export = class Wire extends EventEmitter {
     self._send(metadata);
   }
 
+  signedRequest(params: { [key: string]: any }) {
+    const self = this;
+
+    if (!self.ready) {
+      throw new Error("not ready. Forgot handshake?");
+    }
+
+    // Make sure action and timestamp is not overwritten by accident.
+    const signedRequest = Object.assign(params, {
+      action: Actions.SIGNED_REQUEST,
+      timestamp: Date.now()
+    });
+
+    self._send(signedRequest);
+  }
+
   cleared(infoHash: string) {
     const self = this;
 
@@ -427,6 +444,8 @@ export = class Wire extends EventEmitter {
         return self._onUploaded(params);
       case Actions.METADATA:
         return self._onMetadata(params);
+      case Actions.SIGNED_REQUEST:
+        return self._onSignedRequest(params);
       case Actions.CLEAR:
         return self._onClear(params);
       case Actions.CLEARED:
@@ -578,6 +597,12 @@ export = class Wire extends EventEmitter {
     const self = this;
 
     self.emit("metadata", params);
+  }
+
+  _onSignedRequest(params: any) {
+    const self = this;
+
+    self.emit("signedRequest", params);
   }
 
   _onCleared(params: any) {
