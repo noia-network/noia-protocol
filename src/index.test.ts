@@ -162,6 +162,39 @@ describe("messages from node", () => {
     });
   });
 
+  it("signed requests", done => {
+    const params = {
+      type: "accept",
+      data: 2
+    };
+
+    const masterHandshake = jest.fn();
+    const nodeHandshake = jest.fn();
+    expect.assertions(6);
+
+    _connection(ws => {
+      const masterWire = new Wire(ws);
+      masterWire.on("handshake", masterHandshake);
+      masterWire.on("signedRequest", (info: any) => {
+        expect(nodeHandshake).toHaveBeenCalled();
+        expect(masterHandshake).toHaveBeenCalled();
+        expect(info.action).toBe(Wire.Actions.SIGNED_REQUEST);
+        expect(info.type).toBe(params.type);
+        expect(info.data).toBe(params.data);
+        expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+        _closeAll(done);
+      });
+    });
+
+    _listen(() => {
+      const nodeWire = new Wire(masterAddress);
+      nodeWire.on("handshake", nodeHandshake);
+      nodeWire.handshake().then(() => {
+        nodeWire.signedRequest(params);
+      });
+    });
+  });
+
   test.skip("cached", done => {
     const cacheUrl = "http://example.com/image.jpg";
     const cacheSize = 321;
