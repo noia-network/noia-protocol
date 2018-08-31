@@ -502,15 +502,24 @@ export = class Wire extends EventEmitter {
   _send(params: any) {
     const self = this;
 
-    if (self.closed) return debug("connection is closed");
+    if (self.closed) {
+      debug("connection is closed");
+      return;
+    }
     if (!self.connected) {
-      throw new Error("not connected");
+      debug("not connected");
+      return;
     }
 
     const data = JSON.stringify(params);
     try {
       if (!self.conn) {
-        throw new Error("conn is null");
+        debug("conn is null");
+        return;
+      }
+      if (self.conn.readyState === READY_STATE_CLOSING) {
+        debug("conn is closing, data will not be send");
+        return;
       }
       self.conn.send(data);
     } catch (e) {
