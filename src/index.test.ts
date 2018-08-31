@@ -162,7 +162,7 @@ describe("messages from node", () => {
     });
   });
 
-  it("signed requests", done => {
+  it("signed requests (node to master)", done => {
     const params = {
       type: "accept",
       data: 2
@@ -170,7 +170,8 @@ describe("messages from node", () => {
 
     const masterHandshake = jest.fn();
     const nodeHandshake = jest.fn();
-    expect.assertions(6);
+    const nodeSignedRequest = jest.fn();
+    expect.assertions(7);
 
     _connection(ws => {
       const masterWire = new Wire(ws);
@@ -182,15 +183,58 @@ describe("messages from node", () => {
         expect(info.type).toBe(params.type);
         expect(info.data).toBe(params.data);
         expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+        expect(nodeSignedRequest).not.toHaveBeenCalled();
         _closeAll(done);
+      });
+      masterWire.handshake();
+    });
+
+    _listen(() => {
+      const nodeWire = new Wire(masterAddress);
+      nodeWire.on("handshake", nodeHandshake);
+      nodeWire.on("signedRequest", (info: any) => {
+        nodeSignedRequest();
+      });
+      nodeWire.handshakeResult().then(() => {
+        nodeWire.signedRequest(params);
+      });
+    });
+  });
+
+  it("signed requests (master to node)", done => {
+    const params = {
+      type: "accept",
+      data: 2
+    };
+
+    const masterHandshake = jest.fn();
+    const nodeHandshake = jest.fn();
+    const masterSignedRequest = jest.fn();
+    expect.assertions(7);
+
+    _connection(ws => {
+      const masterWire = new Wire(ws);
+      masterWire.on("handshake", masterHandshake);
+      masterWire.on("signedRequest", (info: any) => {
+        masterSignedRequest();
+      });
+      masterWire.handshake().then(() => {
+        masterWire.signedRequest(params);
       });
     });
 
     _listen(() => {
       const nodeWire = new Wire(masterAddress);
       nodeWire.on("handshake", nodeHandshake);
-      nodeWire.handshake().then(() => {
-        nodeWire.signedRequest(params);
+      nodeWire.on("signedRequest", (info: any) => {
+        expect(nodeHandshake).toHaveBeenCalled();
+        expect(masterHandshake).toHaveBeenCalled();
+        expect(info.action).toBe(Wire.Actions.SIGNED_REQUEST);
+        expect(info.type).toBe(params.type);
+        expect(info.data).toBe(params.data);
+        expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+        expect(masterSignedRequest).not.toHaveBeenCalled();
+        _closeAll(done);
       });
     });
   });
