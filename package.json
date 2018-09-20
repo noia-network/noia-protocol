@@ -1,57 +1,70 @@
 {
-  "name": "@noia-network/protocol",
-  "version": "0.3.7",
-  "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "jest",
-    "watch-jest": "jest --watch",
-    "build": "npm run build-ts",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "prepublishOnly": "rimraf ./dist/**/*.test.*"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/noia-network/noia-protocol.git"
-  },
-  "keywords": [],
-  "author": {
-    "name": "NOIA Network Limited"
-  },
-  "license": "LGPL-2.1",
-  "homepage": "https://github.com/noia-network/noia-protocol",
-  "devDependencies": {
-    "@types/jest": "^22.2.3",
-    "jest": "^22.4.2",
-    "rimraf": "^2.6.2",
-    "ts-jest": "^22.4.5",
-    "typescript": "^2.8.3"
-  },
-  "dependencies": {
-    "@types/ws": "^5.1.1",
-    "debug": "^3.1.0",
-    "tslib": "^1.9.2",
-    "ws": "^5.1.1"
-  },
-  "files": [
-    "dist",
-    "**/*.md",
-    "!/examples"
-  ],
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
+    "publishConfig": {
+        "tag": "rc"
     },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
-  }
+    "name": "@noia-network/protocol",
+    "version": "1.0.0-rc",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "pretest": "tsc -p . --noEmit",
+        "test": "npm run tslint && jest",
+        "posttest": "npm run prettier",
+        "tslint": "tslint --project . --config ./tslint.json && echo Successfully passed tslint test.",
+        "watch-jest": "jest --watch",
+        "build": "tsc",
+        "watch": "tsc -w",
+        "prepublishOnly": "rimraf ./dist/**/*.test.*",
+        "prettier": "prettier \"src/**/*\" -l"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/noia-network/noia-protocol.git"
+    },
+    "keywords": [],
+    "author": {
+        "name": "NOIA Network Limited"
+    },
+    "license": "LGPL-2.1",
+    "homepage": "https://github.com/noia-network/noia-protocol",
+    "devDependencies": {
+        "@types/debug": "0.0.30",
+        "@types/jest": "^22.2.3",
+        "jest": "^22.4.2",
+        "prettier": "^1.14.2",
+        "rimraf": "^2.6.2",
+        "simplr-tslint": "^1.0.0-alpha.14",
+        "ts-jest": "^22.4.5",
+        "tslint": "^5.11.0",
+        "tslint-language-service": "^0.9.9",
+        "typescript": "^3.0.0"
+    },
+    "dependencies": {
+        "@types/ws": "^6.0.0",
+        "debug": "^3.1.0",
+        "strict-event-emitter-types": "^2.0.0",
+        "tslib": "^1.9.2",
+        "ws": "^6.0.0"
+    },
+    "files": [
+        "dist",
+        "**/*.md",
+        "!/examples"
+    ],
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "testEnvironment": "node",
+        "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(tsx?)$",
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js",
+            "jsx",
+            "json",
+            "node"
+        ]
+    }
 }
