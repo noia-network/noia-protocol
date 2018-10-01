@@ -193,6 +193,7 @@ describe("messages from node", () => {
         const params: SignedRequest = {
             type: "accept",
             workOrderAddress: "workOrderAddress",
+            extendWorkOrder: false,
             signedRequest: { nonce: 1, sig: "abc" }
         };
 
@@ -232,6 +233,7 @@ describe("messages from node", () => {
         const params: SignedRequest = {
             type: "accept",
             workOrderAddress: "workOrderAddress",
+            extendWorkOrder: false,
             signedRequest: { nonce: 1, sig: "abc" }
         };
 

@@ -29,6 +29,7 @@ import {
     ClientMetadata
 } from "./contracts";
 import { NotReadyError } from "./not-ready-error";
+import { ProtocolMetadataError } from "./errors";
 
 enum ReadyState {
     /**
@@ -97,7 +98,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         /**
          * Client metadata to send to receiving signature checking function.
          */
-        public readonly localMetadata: TLocalMetadata,
+        private readonly localMetadata: TLocalMetadata,
         /**
          * Signature checking function. Should return true if passes metadata check.
          * If signature checking function not implemented, returns true by default.
@@ -185,7 +186,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
     /**
      * Client metadata to received during signature checking.
      */
-    public remoteMetadata?: TRemoteMetadata;
+    private remoteMetadata?: TRemoteMetadata;
 
     private createWebSocket(socket: string | WebSocket): WebSocket {
         if (typeof socket === "object" && socket.constructor.name === "WebSocket") {
@@ -641,5 +642,19 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             return true;
         }
         return false;
+    }
+
+    public getLocalMetadata(): TLocalMetadata {
+        if (this.localMetadata == null) {
+            throw new ProtocolMetadataError("localMetadata");
+        }
+        return this.localMetadata;
+    }
+
+    public getRemoteMetadata(): TRemoteMetadata {
+        if (this.remoteMetadata == null) {
+            throw new ProtocolMetadataError("remoteMetadata");
+        }
+        return this.remoteMetadata;
     }
 }

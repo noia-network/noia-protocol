@@ -102,6 +102,10 @@ export interface SignedRequest {
         sig: string;
     };
     workOrderAddress: string;
+    /**
+     * Set true during 'release' stage if NOIA node is willing to get more work to do from master (avoids NOIA node reconnect).
+     */
+    extendWorkOrder?: boolean;
     type: "accept" | "accepted" | "release" | "released";
 }
 
@@ -194,6 +198,10 @@ export interface NodeBlockchainMetadata extends NodeMetadata {
      * Job post address.
      */
     jobPostAddress: string;
+    /**
+     * Work order address.
+     */
+    workOrderAddress?: string;
     /**
      * Message to send to signature checking function.
      */
