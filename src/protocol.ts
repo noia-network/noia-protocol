@@ -666,6 +666,13 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         return false;
     }
 
+    public isReady(): boolean {
+        if (this.state & State.Ready && !(this.state & State.Closed)) {
+            return true;
+        }
+        return false;
+    }
+
     public getLocalMetadata(): TLocalMetadata {
         if (this.localMetadata == null) {
             throw new ProtocolMetadataError("localMetadata");
