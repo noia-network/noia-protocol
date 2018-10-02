@@ -8,7 +8,9 @@ import {
     NodeMetadata,
     MasterMetadata,
     NodeBlockchainMetadata,
-    MasterBlockchainMetadata
+    MasterBlockchainMetadata,
+    BandwidthData,
+    StorageData
 } from "./contracts";
 import { Wire } from "./protocol";
 
@@ -150,12 +152,37 @@ describe("messages from node", () => {
         });
     });
 
-    it("metadata", done => {
-        const params = {
-            storage: {
-                available: 5,
-                used: 3,
-                total: 8
+    it("bandwidthData", done => {
+        const params: BandwidthData = {
+            speeds: {
+                download: 1,
+                upload: 2,
+                originalDownload: 3,
+                originalUpload: 4
+            },
+            client: {
+                ip: "A",
+                lat: 5,
+                lon: 6,
+                isp: "B",
+                isprating: 7,
+                rating: 8,
+                ispdlavg: 9,
+                ispulavg: 10,
+                country: "C"
+            },
+            server: {
+                host: "D",
+                lat: 11,
+                lon: 12,
+                location: "E",
+                country: "F",
+                cc: "G",
+                sponsor: "H",
+                distance: 13,
+                distanceMi: 14,
+                ping: 15,
+                id: "I"
             }
         };
 
@@ -166,15 +193,13 @@ describe("messages from node", () => {
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
             masterWire.on("handshake", masterHandshake);
-            masterWire.on("metadata", info => {
+            masterWire.on("bandwidthData", info => {
                 expect(nodeHandshake).toHaveBeenCalled();
                 expect(masterHandshake).toHaveBeenCalled();
-                expect(info.action).toBe(Action.Metadata);
-                expect(info.data.storage).toBeDefined();
-                // @ts-ignore
-                expect(info.data.storage.available).toBe(params.storage.available);
-                // @ts-ignore
-                expect(info.data.storage.used).toBe(params.storage.used);
+                expect(info.action).toBe(Action.BandwidthData);
+                expect(info.data.speeds).toBeDefined();
+                expect(info.data.speeds.download).toBe(params.speeds.download);
+                expect(info.data.server.host).toBe(params.server.host);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
             });
@@ -184,7 +209,41 @@ describe("messages from node", () => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
-                nodeWire.metadata(params);
+                nodeWire.bandwidthData(params);
+            });
+        });
+    });
+
+    it("storageData", done => {
+        const params: StorageData = {
+            available: 5,
+            used: 3,
+            total: 8
+        };
+
+        const masterHandshake = jest.fn();
+        const nodeHandshake = jest.fn();
+        expect.assertions(6);
+
+        TestsHelpers.connection(ws => {
+            const masterWire = new Wire(ws, defaultNodeMetadata);
+            masterWire.on("handshake", masterHandshake);
+            masterWire.on("storageData", info => {
+                expect(nodeHandshake).toHaveBeenCalled();
+                expect(masterHandshake).toHaveBeenCalled();
+                expect(info.action).toBe(Action.StorageData);
+                expect(info.data.available).toBe(params.available);
+                expect(info.data.used).toBe(params.used);
+                expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+                TestsHelpers.closeAll(done);
+            });
+        });
+
+        TestsHelpers.listen(() => {
+            const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
+            nodeWire.on("handshake", nodeHandshake);
+            nodeWire.handshake().then(() => {
+                nodeWire.storageData(params);
             });
         });
     });

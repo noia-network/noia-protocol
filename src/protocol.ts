@@ -8,7 +8,6 @@ import { Helpers } from "./helpers";
 import {
     Action,
     ClosedData,
-    Metadata,
     ProtocolEvent,
     Uploaded,
     SignedRequest,
@@ -26,7 +25,9 @@ import {
     HandshakeFailed,
     HandshakeStatus,
     ProtocolEventsTypes,
-    ClientMetadata
+    ClientMetadata,
+    BandwidthData,
+    StorageData
 } from "./contracts";
 import { NotReadyError } from "./not-ready-error";
 import { ProtocolMetadataError } from "./errors";
@@ -67,6 +68,7 @@ enum State {
 }
 
 interface ProtocolEvents {
+    bandwidthData: (data: ProtocolEvent<BandwidthData>) => this;
     cache: (data: ProtocolEvent<Cache>) => this;
     cached: (data: ProtocolEvent<Cached>) => this;
     clear: (data: ProtocolEvent<Clear>) => this;
@@ -76,12 +78,12 @@ interface ProtocolEvents {
     error: (data: Error) => this;
     handshake: (data: ProtocolEvent<Handshake>) => this;
     handshakeFailed: (data: HandshakeFailed) => this;
-    metadata: (data: ProtocolEvent<Metadata>) => this;
     requested: (data: ProtocolEvent<Requested>) => this;
     response: (data: ProtocolEvent<Response>) => this;
     seed: (data: ProtocolEvent<Seed>) => this;
     seeding: (data: ProtocolEvent<Seeding>) => this;
     signedRequest: (data: ProtocolEvent<SignedRequest>) => this;
+    storageData: (data: ProtocolEvent<StorageData>) => this;
     uploaded: (data: ProtocolEvent<Uploaded>) => this;
     warning: (data: ProtocolEvent<Warning>) => this;
     workOrder: (data: ProtocolEvent<WorkOrder>) => this;
@@ -263,13 +265,26 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(uploaded);
     }
 
-    public metadata(data: Metadata): void {
+    public bandwidthData(data: BandwidthData): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
         }
 
-        const metadata: ProtocolEvent<Metadata> = {
-            action: Action.Metadata,
+        const metadata: ProtocolEvent<BandwidthData> = {
+            action: Action.BandwidthData,
+            timestamp: Date.now(),
+            data: data
+        };
+        this.send(metadata);
+    }
+
+    public storageData(data: StorageData): void {
+        if (!(this.state & State.Ready)) {
+            throw new NotReadyError();
+        }
+
+        const metadata: ProtocolEvent<StorageData> = {
+            action: Action.StorageData,
             timestamp: Date.now(),
             data: data
         };
@@ -455,8 +470,11 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             case Action.Uploaded:
                 this.onUploaded(params as ProtocolEvent<Uploaded>);
                 break;
-            case Action.Metadata:
-                this.onMetadata(params as ProtocolEvent<Metadata>);
+            case Action.BandwidthData:
+                this.onBandwidthData(params as ProtocolEvent<BandwidthData>);
+                break;
+            case Action.StorageData:
+                this.onStorageData(params as ProtocolEvent<StorageData>);
                 break;
             case Action.SignedRequest:
                 this.onSignedRequest(params as ProtocolEvent<SignedRequest>);
@@ -589,8 +607,12 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.emit("uploaded", params);
     }
 
-    protected onMetadata(params: ProtocolEvent<Metadata>): void {
-        this.emit("metadata", params);
+    protected onBandwidthData(params: ProtocolEvent<BandwidthData>): void {
+        this.emit("bandwidthData", params);
+    }
+
+    protected onStorageData(params: ProtocolEvent<StorageData>): void {
+        this.emit("storageData", params);
     }
 
     protected onSignedRequest(params: ProtocolEvent<SignedRequest>): void {

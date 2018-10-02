@@ -7,34 +7,37 @@ export enum HandshakeStatus {
 }
 
 export enum Action {
-    Handshake = "handhshake",
-    Uploaded = "uploaded",
-    Metadata = "metadata",
-    SignedRequest = "signed-request",
-    Clear = "clear",
-    Cleared = "cleared",
+    BandwidthData = "bandwidth-data",
     Cache = "cache",
     Cached = "cached",
+    Clear = "clear",
+    Cleared = "cleared",
+    Handshake = "handhshake",
+    Metadata = "metadata",
+    Requested = "requested",
+    Response = "response",
     Seed = "seed",
     Seeding = "seeding",
+    SignedRequest = "signed-request",
+    StorageData = "storage-data",
+    Uploaded = "uploaded",
     Warning = "warning",
-    WorkOrder = "work-order",
-    Requested = "requested",
-    Response = "response"
+    WorkOrder = "work-order"
 }
 
 export type ProtocolEventsTypes =
+    | BandwidthData
     | Cache
     | Cached
     | Clear
     | Cleared
     | Handshake
-    | Metadata
     | Requested
     | Response
     | Seed
     | Seeding
     | SignedRequest
+    | StorageData
     | Uploaded
     | Warning
     | WorkOrder;
@@ -51,13 +54,13 @@ export interface Uploaded {
     uploaded: number;
 }
 
-export interface MetadataStorage {
+export interface StorageData {
     total: number;
     used: number;
     available: number;
 }
 
-export interface MetadataSpeed {
+export interface BandwidthData {
     speeds: {
         download: number;
         upload: number;
@@ -88,11 +91,6 @@ export interface MetadataSpeed {
         ping: number;
         id: string;
     };
-}
-
-export interface Metadata {
-    storage?: MetadataStorage;
-    speedTest?: MetadataSpeed;
 }
 
 export interface SignedRequest {
