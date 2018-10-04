@@ -1,7 +1,8 @@
 import * as EventEmitter from "events";
-import StrictEventEmitter from "strict-event-emitter-types";
 import * as WebSocket from "ws";
 import * as debug from "debug";
+import * as path from "path";
+import StrictEventEmitter from "strict-event-emitter-types";
 const log: debug.IDebugger = debug("noia-protocol:protocol");
 
 import { Helpers } from "./helpers";
@@ -189,6 +190,10 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
      * Client metadata to received during signature checking.
      */
     private remoteMetadata?: TRemoteMetadata;
+
+    public static getProtoFilePath(): string {
+        return path.normalize(path.join(__dirname, "proto.json"));
+    }
 
     private createWebSocket(socket: string | WebSocket): WebSocket {
         if (typeof socket === "object" && socket.constructor.name === "WebSocket") {
