@@ -2,17 +2,21 @@
     "nested": {
         "ContentResponseData": {
             "fields": {
-                "offset": {
-                    "type": "int32",
+                "contentId": {
+                    "type": "string",
                     "id": 1
                 },
-                "index": {
+                "offset": {
                     "type": "int32",
                     "id": 2
                 },
+                "index": {
+                    "type": "int32",
+                    "id": 3
+                },
                 "buffer": {
                     "type": "bytes",
-                    "id": 3
+                    "id": 4
                 }
             }
         },
