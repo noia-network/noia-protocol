@@ -3,7 +3,7 @@
         "tag": "alpha"
     },
     "name": "@noia-network/protocol",
-    "version": "1.0.0-alpha.3",
+    "version": "1.0.0-alpha.2",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
         "posttest": "npm run prettier",
         "tslint": "tslint --project . --config ./tslint.json && echo Successfully passed tslint test.",
         "watch-jest": "jest --watch",
-        "build": "tsc && cp ./src/proto.json ./dist/",
+        "build": "cp ./src/proto.json ./dist/ && tsc",
         "watch": "tsc -w",
         "prepublishOnly": "rimraf ./dist/**/*.test.*",
         "prettier": "prettier \"src/**/*\" -l"
