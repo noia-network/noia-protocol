@@ -117,22 +117,10 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
 
         this.socket = this.createWebSocket(socket);
 
-        if (this.socket.readyState === ReadyState.Connecting) {
-            this.socket.on("open", () => {
-                this.state |= State.Connected;
-                this.emit("connected");
-            });
-        } else if (this.socket.readyState === ReadyState.Open) {
-            this.state |= State.Connected;
-            this.emit("connected");
-        } else {
-            throw new Error("Something went wrong while opening connection.");
-        }
-
+        // Subscribe to events.
         this.socket.onerror = event => {
             this.emit("error", event.error);
         };
-
         this.socket.onclose = event => {
             if (this.state & State.Closed) {
                 return;
@@ -145,7 +133,6 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             };
             this.emit("closed", closedData);
         };
-
         this.socket.on("message", message => {
             const params = Helpers.parseJSON(message as string);
             if (params) {
@@ -158,7 +145,6 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.socket.on("pong", () => {
             isAlive = true;
         });
-
         let interval: NodeJS.Timer;
         this.once("connected", () => {
             interval = setInterval(() => {
@@ -179,8 +165,24 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
                 this.socket.ping(Helpers.noop);
             }, 10000);
         });
+
+        // Emit connected if socket is opened or once opened.
+        if (this.socket.readyState === ReadyState.Connecting) {
+            this.socket.on("open", () => {
+                this.state |= State.Connected;
+                this.emit("connected");
+            });
+        } else if (this.socket.readyState === ReadyState.Open) {
+            this.state |= State.Connected;
+            this.emit("connected");
+        } else {
+            throw new Error("Something went wrong while opening connection.");
+        }
     }
 
+    /**
+     * Communication session state.
+     */
     protected state: State = State.None;
     /**
      * Communication session.
@@ -533,22 +535,22 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
 
     private send<TType extends ProtocolEventsTypes>(params: ProtocolEvent<TType>): void {
         if (this.state & State.Closed) {
-            log("connection is closed");
+            log("Cannot send data, since connection is closed.");
             return;
         }
         if (!(this.state & State.Connected)) {
-            log("not connected");
+            log("Cannot send data, since not connected.");
             return;
         }
 
         const data = JSON.stringify(params);
         try {
             if (!this.socket) {
-                log("socket is null");
+                log("Cannot send data over null socket.");
                 return;
             }
             if (this.socket.readyState === ReadyState.Closing) {
-                log("socket is closing, data will not be send");
+                log("Cannot send data, since socket is being closed.");
                 return;
             }
             this.socket.send(data);
