@@ -3,7 +3,7 @@
         "tag": "rc"
     },
     "name": "@noia-network/protocol",
-    "version": "1.0.1-rc.3",
+    "version": "1.0.1-rc.4",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

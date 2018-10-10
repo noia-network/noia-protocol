@@ -105,6 +105,10 @@ export interface SignedRequest {
      */
     extendWorkOrder?: boolean;
     type: "accept" | "accepted" | "release" | "released";
+    /**
+     * Both parties should check if error has occured while handling signed request.
+     */
+    error?: string;
 }
 
 export interface Cached {
