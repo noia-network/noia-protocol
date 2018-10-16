@@ -22,7 +22,7 @@ const defaultNodeMetadata: NodeMetadata = {
     connections: { webrtc: 1, ws: 2, wss: 3 },
     interface: "cli",
     version: "1.0.0",
-    walletAddress: "myWalletAddress"
+    airdropAddress: "myAirdropAddress"
 };
 
 const defaultMasterMetadata: MasterMetadata = {
@@ -827,7 +827,15 @@ describe("handshake validation", () => {
         const masterMetadata: MasterBlockchainMetadata = { ...defaultMasterMetadata, ...{ msg: "1", msgSigned: "1" } };
         const nodeMetadata: NodeBlockchainMetadata = {
             ...defaultNodeMetadata,
-            ...{ msg: "1", msgSigned: "1", version: "123", jobPostAddress: "jobPostAddress" }
+            ...{
+                msg: "1",
+                msgSigned: "1",
+                version: "123",
+                jobPostAddress: "jobPostAddress",
+                airdropAddress: "myAirdropAddress",
+                workOrderAddress: null,
+                walletAddress: "myWalletAddress"
+            }
         };
         expect.assertions(4);
         const masterHandshake = jest.fn();
