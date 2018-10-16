@@ -165,7 +165,7 @@ export interface NodeMetadata {
     /**
      * Flag if using CLI or GUI NOIA node.
      */
-    interface: "cli" | "gui";
+    interface: "cli" | "gui" | "unspecified";
     /**
      * NOIA Node supported connections.
      */
@@ -183,9 +183,9 @@ export interface NodeMetadata {
      */
     version: string;
     /**
-     * NOIA node wallet address.
+     * NOIA node airdrop address.
      */
-    walletAddress: string;
+    airdropAddress: string | null;
 }
 
 export interface MasterMetadata {
@@ -203,7 +203,7 @@ export interface NodeBlockchainMetadata extends NodeMetadata {
     /**
      * Work order address.
      */
-    workOrderAddress?: string;
+    workOrderAddress: string | null;
     /**
      * Message to send to signature checking function.
      */
@@ -212,6 +212,10 @@ export interface NodeBlockchainMetadata extends NodeMetadata {
      * Signed message to send to signature checking function.
      */
     msgSigned: string;
+    /**
+     * NOIA node wallet address.
+     */
+    walletAddress: string;
 }
 
 export interface MasterBlockchainMetadata extends MasterMetadata {
