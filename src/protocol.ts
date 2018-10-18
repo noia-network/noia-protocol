@@ -28,7 +28,9 @@ import {
     ProtocolEventsTypes,
     ClientMetadata,
     BandwidthData,
-    StorageData
+    StorageData,
+    Downloaded,
+    Statistics
 } from "./contracts";
 import { NotReadyError } from "./not-ready-error";
 import { ProtocolMetadataError } from "./errors";
@@ -86,8 +88,10 @@ interface ProtocolEvents {
     signedRequest: (data: ProtocolEvent<SignedRequest>) => this;
     storageData: (data: ProtocolEvent<StorageData>) => this;
     uploaded: (data: ProtocolEvent<Uploaded>) => this;
+    downloaded: (data: ProtocolEvent<Downloaded>) => this;
     warning: (data: ProtocolEvent<Warning>) => this;
     workOrder: (data: ProtocolEvent<WorkOrder>) => this;
+    statistics: (data: ProtocolEvent<Statistics>) => this;
 }
 
 const ProtocolEmitter: { new (): StrictEventEmitter<EventEmitter, ProtocolEvents> } = EventEmitter;
@@ -255,7 +259,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         });
     }
 
-    public uploaded(infoHash: string, bandwidth: number, ip: string): void {
+    public uploaded(infoHash: string, bandwidth: number): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
         }
@@ -263,13 +267,28 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         const uploaded: ProtocolEvent<Uploaded> = {
             action: Action.Uploaded,
             data: {
-                ip: ip,
                 infoHash: infoHash,
                 uploaded: bandwidth
             },
             timestamp: Date.now()
         };
         this.send(uploaded);
+    }
+
+    public downloaded(infoHash: string, bandwidth: number): void {
+        if (!(this.state & State.Ready)) {
+            throw new NotReadyError();
+        }
+
+        const downloaded: ProtocolEvent<Downloaded> = {
+            action: Action.Downloaded,
+            data: {
+                infoHash: infoHash,
+                downloaded: bandwidth
+            },
+            timestamp: Date.now()
+        };
+        this.send(downloaded);
     }
 
     public bandwidthData(data: BandwidthData): void {
@@ -438,6 +457,23 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(workOrder);
     }
 
+    public statistics(statistics: Statistics): void {
+        if (!(this.state & State.Ready)) {
+            throw new NotReadyError();
+        }
+
+        const stats: ProtocolEvent<Statistics> = {
+            action: Action.Statistics,
+            data: {
+                time: statistics.time,
+                downloaded: statistics.downloaded,
+                uploaded: statistics.uploaded
+            },
+            timestamp: Date.now()
+        };
+        this.send(stats);
+    }
+
     public requested(piece: number, infoHash: string): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
@@ -477,6 +513,9 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             case Action.Uploaded:
                 this.onUploaded(params as ProtocolEvent<Uploaded>);
                 break;
+            case Action.Downloaded:
+                this.onDownloaded(params as ProtocolEvent<Downloaded>);
+                break;
             case Action.BandwidthData:
                 this.onBandwidthData(params as ProtocolEvent<BandwidthData>);
                 break;
@@ -509,6 +548,9 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
                 break;
             case Action.WorkOrder:
                 this.onWorkOrder(params as ProtocolEvent<WorkOrder>);
+                break;
+            case Action.Statistics:
+                this.onStatistics(params as ProtocolEvent<Statistics>);
                 break;
             case Action.Requested:
                 this.onRequested(params as ProtocolEvent<Requested>);
@@ -614,6 +656,10 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.emit("uploaded", params);
     }
 
+    protected onDownloaded(params: ProtocolEvent<Downloaded>): void {
+        this.emit("downloaded", params);
+    }
+
     protected onBandwidthData(params: ProtocolEvent<BandwidthData>): void {
         this.emit("bandwidthData", params);
     }
@@ -656,6 +702,10 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
 
     protected onWorkOrder(params: ProtocolEvent<WorkOrder>): void {
         this.emit("workOrder", params);
+    }
+
+    protected onStatistics(params: ProtocolEvent<Statistics>): void {
+        this.emit("statistics", params);
     }
 
     protected onRequested(params: ProtocolEvent<Requested>): void {
