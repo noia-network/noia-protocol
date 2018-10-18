@@ -21,8 +21,10 @@ export enum Action {
     SignedRequest = "signed-request",
     StorageData = "storage-data",
     Uploaded = "uploaded",
+    Downloaded = "downloaded",
     Warning = "warning",
-    WorkOrder = "work-order"
+    WorkOrder = "work-order",
+    Statistics = "statistics"
 }
 
 export type ProtocolEventsTypes =
@@ -39,8 +41,10 @@ export type ProtocolEventsTypes =
     | SignedRequest
     | StorageData
     | Uploaded
+    | Downloaded
     | Warning
-    | WorkOrder;
+    | WorkOrder
+    | Statistics;
 
 export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
     action: Action;
@@ -50,8 +54,12 @@ export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
 
 export interface Uploaded {
     infoHash: string;
-    ip: string;
     uploaded: number;
+}
+
+export interface Downloaded {
+    infoHash: string;
+    downloaded: number;
 }
 
 export interface StorageData {
@@ -136,6 +144,21 @@ export interface Cache {
 
 export interface WorkOrder {
     address: string;
+}
+
+export interface Statistics {
+    /**
+     * Online time in seconds.
+     */
+    time: number;
+    /**
+     * Bytes node has uploaded.
+     */
+    uploaded: number;
+    /**
+     * Bytes node has downloaded.
+     */
+    downloaded: number;
 }
 
 export interface Seed {

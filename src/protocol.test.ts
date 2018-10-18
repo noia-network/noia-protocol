@@ -10,7 +10,8 @@ import {
     NodeBlockchainMetadata,
     MasterBlockchainMetadata,
     BandwidthData,
-    StorageData
+    StorageData,
+    Statistics
 } from "./contracts";
 import { Wire } from "./protocol";
 
@@ -122,11 +123,10 @@ describe("messages from node", () => {
     it("uploaded", done => {
         const bandwidth = 123123;
         const infoHash = "1111111111111111111111111111111111upload";
-        const nodeHost = "123.1.12.23";
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(7);
+        expect.assertions(6);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -135,7 +135,6 @@ describe("messages from node", () => {
                 expect(nodeHandshake).toHaveBeenCalled();
                 expect(masterHandshake).toHaveBeenCalled();
                 expect(info.action).toBe(Action.Uploaded);
-                expect(info.data.ip).toBe(nodeHost);
                 expect(info.data.infoHash).toBe(infoHash);
                 expect(info.data.uploaded).toBe(bandwidth);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
@@ -147,7 +146,38 @@ describe("messages from node", () => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
-                nodeWire.uploaded(infoHash, bandwidth, nodeHost);
+                nodeWire.uploaded(infoHash, bandwidth);
+            });
+        });
+    });
+
+    it("downloaded", done => {
+        const bandwidth = 123123;
+        const infoHash = "1111111111111111111111111111111111download";
+
+        const masterHandshake = jest.fn();
+        const nodeHandshake = jest.fn();
+        expect.assertions(6);
+
+        TestsHelpers.connection(ws => {
+            const masterWire = new Wire(ws, defaultNodeMetadata);
+            masterWire.on("handshake", masterHandshake);
+            masterWire.on("downloaded", info => {
+                expect(nodeHandshake).toHaveBeenCalled();
+                expect(masterHandshake).toHaveBeenCalled();
+                expect(info.action).toBe(Action.Downloaded);
+                expect(info.data.infoHash).toBe(infoHash);
+                expect(info.data.downloaded).toBe(bandwidth);
+                expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+                TestsHelpers.closeAll(done);
+            });
+        });
+
+        TestsHelpers.listen(() => {
+            const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
+            nodeWire.on("handshake", nodeHandshake);
+            nodeWire.handshake().then(() => {
+                nodeWire.downloaded(infoHash, bandwidth);
             });
         });
     });
@@ -561,6 +591,44 @@ describe("messages from master", () => {
                     expect(masterHandshake).toHaveBeenCalled();
                     expect(info.action).toBe(Action.WorkOrder);
                     expect(info.data.address).toBe(workOrderAddress);
+                    expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+                    expect(info.timestamp).toBeGreaterThanOrEqual(START_TIMESTAMP);
+                    TestsHelpers.closeAll(done);
+                });
+            });
+        });
+    });
+
+    test("statistics", done => {
+        const stats: Statistics = {
+            time: 123,
+            downloaded: 234,
+            uploaded: 345
+        };
+
+        const masterHandshake = jest.fn();
+        const nodeHandshake = jest.fn();
+        expect.assertions(8);
+
+        TestsHelpers.connection(ws => {
+            const masterWire = new Wire(ws, defaultNodeMetadata);
+            masterWire.on("handshake", () => {
+                masterHandshake();
+                masterWire.statistics(stats);
+            });
+        });
+
+        TestsHelpers.listen(() => {
+            const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
+            nodeWire.on("handshake", nodeHandshake);
+            nodeWire.handshake().then(() => {
+                nodeWire.on("statistics", info => {
+                    expect(nodeHandshake).toHaveBeenCalled();
+                    expect(masterHandshake).toHaveBeenCalled();
+                    expect(info.action).toBe(Action.Statistics);
+                    expect(info.data.time).toBe(info.data.time);
+                    expect(info.data.downloaded).toBe(info.data.downloaded);
+                    expect(info.data.uploaded).toBe(info.data.uploaded);
                     expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                     expect(info.timestamp).toBeGreaterThanOrEqual(START_TIMESTAMP);
                     TestsHelpers.closeAll(done);
