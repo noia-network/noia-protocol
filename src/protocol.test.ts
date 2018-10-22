@@ -605,7 +605,13 @@ describe("messages from master", () => {
 
     test("statistics", done => {
         const stats: Statistics = {
-            time: 123,
+            time: {
+                days: 1,
+                hours: 2,
+                minutes: 3,
+                seconds: 4,
+                total: 5
+            },
             downloaded: 234,
             uploaded: 345
         };
