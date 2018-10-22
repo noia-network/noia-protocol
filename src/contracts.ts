@@ -150,9 +150,18 @@ export interface WorkOrder {
 
 export interface Statistics {
     /**
-     * Online time in seconds.
+     * Online time object.
      */
-    time: number;
+    time: {
+        /**
+         * Total in seconds.
+         */
+        total: number;
+        seconds: number;
+        minutes: number;
+        hours: number;
+        days: number;
+    };
     /**
      * Bytes node has uploaded.
      */
