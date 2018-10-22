@@ -259,7 +259,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         });
     }
 
-    public uploaded(infoHash: string, bandwidth: number): void {
+    public uploaded(infoHash: string, ip: string, bandwidth: number): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
         }
@@ -268,6 +268,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             action: Action.Uploaded,
             data: {
                 infoHash: infoHash,
+                ip: ip,
                 uploaded: bandwidth
             },
             timestamp: Date.now()
@@ -275,7 +276,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(uploaded);
     }
 
-    public downloaded(infoHash: string, bandwidth: number): void {
+    public downloaded(infoHash: string, ip: string, bandwidth: number): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
         }
@@ -284,6 +285,7 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             action: Action.Downloaded,
             data: {
                 infoHash: infoHash,
+                ip: ip,
                 downloaded: bandwidth
             },
             timestamp: Date.now()

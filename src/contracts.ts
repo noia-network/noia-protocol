@@ -54,11 +54,13 @@ export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
 
 export interface Uploaded {
     infoHash: string;
+    ip: string;
     uploaded: number;
 }
 
 export interface Downloaded {
     infoHash: string;
+    ip: string;
     downloaded: number;
 }
 

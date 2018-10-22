@@ -123,10 +123,11 @@ describe("messages from node", () => {
     it("uploaded", done => {
         const bandwidth = 123123;
         const infoHash = "1111111111111111111111111111111111upload";
+        const ip = "1.2.3.4";
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(6);
+        expect.assertions(7);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -136,6 +137,7 @@ describe("messages from node", () => {
                 expect(masterHandshake).toHaveBeenCalled();
                 expect(info.action).toBe(Action.Uploaded);
                 expect(info.data.infoHash).toBe(infoHash);
+                expect(info.data.ip).toBe(ip);
                 expect(info.data.uploaded).toBe(bandwidth);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
@@ -146,7 +148,7 @@ describe("messages from node", () => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
-                nodeWire.uploaded(infoHash, bandwidth);
+                nodeWire.uploaded(infoHash, ip, bandwidth);
             });
         });
     });
@@ -154,10 +156,11 @@ describe("messages from node", () => {
     it("downloaded", done => {
         const bandwidth = 123123;
         const infoHash = "1111111111111111111111111111111111download";
+        const ip = "2.3.4.5";
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(6);
+        expect.assertions(7);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -167,6 +170,7 @@ describe("messages from node", () => {
                 expect(masterHandshake).toHaveBeenCalled();
                 expect(info.action).toBe(Action.Downloaded);
                 expect(info.data.infoHash).toBe(infoHash);
+                expect(info.data.ip).toBe(ip);
                 expect(info.data.downloaded).toBe(bandwidth);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
@@ -177,7 +181,7 @@ describe("messages from node", () => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
-                nodeWire.downloaded(infoHash, bandwidth);
+                nodeWire.downloaded(infoHash, ip, bandwidth);
             });
         });
     });
