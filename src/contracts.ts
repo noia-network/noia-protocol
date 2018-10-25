@@ -160,7 +160,6 @@ export interface Statistics {
         seconds: number;
         minutes: number;
         hours: number;
-        days: number;
     };
     /**
      * Bytes node has uploaded.
