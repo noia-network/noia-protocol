@@ -606,7 +606,6 @@ describe("messages from master", () => {
     test("statistics", done => {
         const stats: Statistics = {
             time: {
-                days: 1,
                 hours: 2,
                 minutes: 3,
                 seconds: 4,
