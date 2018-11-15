@@ -17,7 +17,7 @@ export interface ContentRequest {
 
 export interface Peer {
     host: string;
-    secretKey: string;
+    secretKey: string | null;
     ports: {
         ws?: number;
         wss?: number;
