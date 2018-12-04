@@ -173,6 +173,12 @@ export interface Statistics {
 
 export interface Seed {
     metadata: {
+        /**
+         * Source to download content from.
+         * If source is null or undefined, expect that it's master wire.
+         * If source is not null or undefined,, expect that it's webrtc connection.
+         */
+        source?: string | null;
         infoHash: string;
         pieces: number;
     };

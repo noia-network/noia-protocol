@@ -649,6 +649,7 @@ describe("messages from master", () => {
     test("seed", done => {
         const metadata: Seed = {
             metadata: {
+                source: "example.address",
                 infoHash: "123456789123456789",
                 pieces: 10
             }
@@ -656,7 +657,7 @@ describe("messages from master", () => {
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(4);
+        expect.assertions(5);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -675,6 +676,7 @@ describe("messages from master", () => {
                     expect(masterHandshake).toHaveBeenCalled();
                     expect(info.data.metadata.infoHash).toBe(metadata.metadata.infoHash);
                     expect(info.data.metadata.pieces).toBe(metadata.metadata.pieces);
+                    expect(info.data.metadata.source).toBe(metadata.metadata.source);
                     TestsHelpers.closeAll(done);
                 });
             });
