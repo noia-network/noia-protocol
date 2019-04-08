@@ -68,6 +68,11 @@ export interface StorageData {
     total: number;
     used: number;
     available: number;
+    // TODO: refactor below properties to separate interface.
+    arch?: string;
+    release?: string;
+    platform?: string;
+    deviceType?: string;
 }
 
 export interface BandwidthData {
@@ -181,6 +186,7 @@ export interface Seed {
         source?: string | null;
         infoHash: string;
         pieces: number;
+        piecesIntegrity?: string[];
     };
 }
 
