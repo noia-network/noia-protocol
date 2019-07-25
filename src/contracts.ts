@@ -1,3 +1,5 @@
+import { Systeminformation } from "systeminformation";
+
 export enum HandshakeStatus {
     Done = "done",
     Notified = "notified",
@@ -24,7 +26,8 @@ export enum Action {
     Downloaded = "downloaded",
     Warning = "warning",
     WorkOrder = "work-order",
-    Statistics = "statistics"
+    Statistics = "statistics",
+    NetworkData = "network-data"
 }
 
 export type ProtocolEventsTypes =
@@ -44,7 +47,8 @@ export type ProtocolEventsTypes =
     | Downloaded
     | Warning
     | WorkOrder
-    | Statistics;
+    | Statistics
+    | NetworkInterfaces;
 
 export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
     action: Action;
@@ -69,10 +73,40 @@ export interface StorageData {
     used: number;
     available: number;
     // TODO: refactor below properties to separate interface.
-    arch?: string;
-    release?: string;
-    platform?: string;
     deviceType?: string;
+    settingsVersion?: string;
+    arch?: string;
+    platform?: string;
+    release?: string;
+    distro?: string;
+    pingIpv6: boolean;
+    ipv4?: string;
+    ipv6?: string;
+    iface?: string;
+    ifaceName?: string;
+    mac?: string;
+    internal?: boolean;
+    virtual?: boolean;
+    operstate?: string;
+    type?: string;
+    duplex?: string;
+    mtu?: number;
+    speed?: number;
+    interfacesLength: number;
+}
+
+export interface NetworkInterfaces extends Systeminformation.NetworkInterfacesData {
+    iface: string;
+    ifaceName: string;
+    mac: string;
+    internal: boolean;
+    virtual: boolean;
+    operstate: string;
+    type: string;
+    duplex: string;
+    mtu: number;
+    speed: number;
+    interfacesLength: number;
 }
 
 export interface BandwidthData {
