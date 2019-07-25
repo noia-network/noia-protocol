@@ -11,7 +11,8 @@ import {
     MasterBlockchainMetadata,
     BandwidthData,
     StorageData,
-    Statistics
+    Statistics,
+    NetworkInterfaces
 } from "./contracts";
 import { Wire } from "./protocol";
 
@@ -58,6 +59,7 @@ namespace TestsHelpers {
     }
 
     export function listen(cb: () => void): void {
+        // @ts-ignore
         masterServer.listen(MASTER_PORT, (err: Error) => {
             if (err) {
                 throw new Error(err.message);
@@ -252,12 +254,14 @@ describe("messages from node", () => {
         const params: StorageData = {
             available: 5,
             used: 3,
-            total: 8
+            total: 8,
+            pingIpv6: true,
+            interfacesLength: 2
         };
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(6);
+        expect.assertions(8);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -268,6 +272,8 @@ describe("messages from node", () => {
                 expect(info.action).toBe(Action.StorageData);
                 expect(info.data.available).toBe(params.available);
                 expect(info.data.used).toBe(params.used);
+                expect(info.data.pingIpv6).toBe(params.pingIpv6);
+                expect(info.data.speed).toBe(params.speed);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
             });
@@ -282,42 +288,58 @@ describe("messages from node", () => {
         });
     });
 
-    it("signed requests (node to master)", done => {
-        const params: SignedRequest = {
-            type: "accept",
-            workOrderAddress: "workOrderAddress",
-            extendWorkOrder: false,
-            signedRequest: { nonce: 1, sig: "abc" }
+    it("networkData", done => {
+        const params: NetworkInterfaces = {
+            iface: "VirtualBox Host-Only Network",
+            ifaceName: "VirtualBox Host-Only Ethernet Adapter",
+            ip4: "192.168.0.1",
+            ip6: "",
+            mac: "fe80::0000:0000:0000:000",
+            internal: false,
+            virtual: false,
+            operstate: "up",
+            type: "wired",
+            duplex: "",
+            mtu: 1,
+            speed: 100,
+            carrier_changes: 0,
+            interfacesLength: 1
         };
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        const nodeSignedRequest = jest.fn();
-        expect.assertions(6);
+        expect.assertions(17);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
             masterWire.on("handshake", masterHandshake);
-            masterWire.on("signedRequest", info => {
+            masterWire.on("networkData", info => {
                 expect(nodeHandshake).toHaveBeenCalled();
                 expect(masterHandshake).toHaveBeenCalled();
-                expect(info.action).toBe(Action.SignedRequest);
+                expect(info.action).toBe(Action.NetworkData);
+                expect(info.data.iface).toBe(params.iface);
+                expect(info.data.ifaceName).toBe(params.ifaceName);
+                expect(info.data.ip4).toBe(params.ip4);
+                expect(info.data.ip6).toBe(params.ip6);
+                expect(info.data.mac).toBe(params.mac);
+                expect(info.data.internal).toBe(params.internal);
+                expect(info.data.virtual).toBe(params.virtual);
+                expect(info.data.operstate).toBe(params.operstate);
                 expect(info.data.type).toBe(params.type);
+                expect(info.data.duplex).toBe(params.duplex);
+                expect(info.data.mtu).toBe(params.mtu);
+                expect(info.data.speed).toBe(params.speed);
+                expect(info.data.carrier_changes).toBe(params.carrier_changes);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
-                expect(nodeSignedRequest).not.toHaveBeenCalled();
                 TestsHelpers.closeAll(done);
             });
-            masterWire.handshake();
         });
 
         TestsHelpers.listen(() => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
-            nodeWire.on("signedRequest", info => {
-                nodeSignedRequest();
-            });
-            nodeWire.handshakeResult().then(() => {
-                nodeWire.signedRequest(params);
+            nodeWire.handshake().then(() => {
+                nodeWire.networkData(params);
             });
         });
     });
