@@ -27,7 +27,7 @@ export enum Action {
     Warning = "warning",
     WorkOrder = "work-order",
     Statistics = "statistics",
-    NetworkData = "network-data"
+    NodeSystemData = "node-system-data"
 }
 
 export type ProtocolEventsTypes =
@@ -48,7 +48,7 @@ export type ProtocolEventsTypes =
     | Warning
     | WorkOrder
     | Statistics
-    | NetworkInterfaces;
+    | NodeInfoData;
 
 export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
     action: Action;
@@ -72,9 +72,11 @@ export interface StorageData {
     total: number;
     used: number;
     available: number;
-    // TODO: refactor below properties to separate interface.
+}
+
+export interface NodeInfoData {
     deviceType?: string;
-    settingsVersion?: string;
+    settingsVersion: string;
     arch?: string;
     platform?: string;
     release?: string;
@@ -92,7 +94,7 @@ export interface StorageData {
     duplex?: string;
     mtu?: number;
     speed?: number;
-    interfacesLength: number;
+    interfacesLength?: number;
 }
 
 export interface NetworkInterfaces extends Systeminformation.NetworkInterfacesData {
