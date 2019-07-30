@@ -12,7 +12,7 @@ import {
     BandwidthData,
     StorageData,
     Statistics,
-    NetworkInterfaces
+    NodeInfoData
 } from "./contracts";
 import { Wire } from "./protocol";
 
@@ -254,14 +254,12 @@ describe("messages from node", () => {
         const params: StorageData = {
             available: 5,
             used: 3,
-            total: 8,
-            pingIpv6: true,
-            interfacesLength: 2
+            total: 8
         };
 
         const masterHandshake = jest.fn();
         const nodeHandshake = jest.fn();
-        expect.assertions(8);
+        expect.assertions(6);
 
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
@@ -272,8 +270,6 @@ describe("messages from node", () => {
                 expect(info.action).toBe(Action.StorageData);
                 expect(info.data.available).toBe(params.available);
                 expect(info.data.used).toBe(params.used);
-                expect(info.data.pingIpv6).toBe(params.pingIpv6);
-                expect(info.data.speed).toBe(params.speed);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
             });
@@ -288,12 +284,10 @@ describe("messages from node", () => {
         });
     });
 
-    it("networkData", done => {
-        const params: NetworkInterfaces = {
+    it("nodeInfoData", done => {
+        const params: NodeInfoData = {
             iface: "VirtualBox Host-Only Network",
             ifaceName: "VirtualBox Host-Only Ethernet Adapter",
-            ip4: "192.168.0.1",
-            ip6: "",
             mac: "fe80::0000:0000:0000:000",
             internal: false,
             virtual: false,
@@ -302,8 +296,9 @@ describe("messages from node", () => {
             duplex: "",
             mtu: 1,
             speed: 100,
-            carrier_changes: 0,
-            interfacesLength: 1
+            interfacesLength: 1,
+            pingIpv6: false,
+            settingsVersion: ""
         };
 
         const masterHandshake = jest.fn();
@@ -313,14 +308,12 @@ describe("messages from node", () => {
         TestsHelpers.connection(ws => {
             const masterWire = new Wire(ws, defaultNodeMetadata);
             masterWire.on("handshake", masterHandshake);
-            masterWire.on("networkData", info => {
+            masterWire.on("nodeInfoData", info => {
                 expect(nodeHandshake).toHaveBeenCalled();
                 expect(masterHandshake).toHaveBeenCalled();
-                expect(info.action).toBe(Action.NetworkData);
+                expect(info.action).toBe(Action.NodeSystemData);
                 expect(info.data.iface).toBe(params.iface);
                 expect(info.data.ifaceName).toBe(params.ifaceName);
-                expect(info.data.ip4).toBe(params.ip4);
-                expect(info.data.ip6).toBe(params.ip6);
                 expect(info.data.mac).toBe(params.mac);
                 expect(info.data.internal).toBe(params.internal);
                 expect(info.data.virtual).toBe(params.virtual);
@@ -329,7 +322,9 @@ describe("messages from node", () => {
                 expect(info.data.duplex).toBe(params.duplex);
                 expect(info.data.mtu).toBe(params.mtu);
                 expect(info.data.speed).toBe(params.speed);
-                expect(info.data.carrier_changes).toBe(params.carrier_changes);
+                expect(info.data.interfacesLength).toBe(params.interfacesLength);
+                expect(info.data.pingIpv6).toBe(params.pingIpv6);
+                expect(info.data.settingsVersion).toBe(params.settingsVersion);
                 expect(info.timestamp).toBeLessThanOrEqual(Date.now());
                 TestsHelpers.closeAll(done);
             });
@@ -339,7 +334,7 @@ describe("messages from node", () => {
             const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
-                nodeWire.networkData(params);
+                nodeWire.nodeSystemData(params);
             });
         });
     });

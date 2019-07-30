@@ -31,7 +31,7 @@ import {
     StorageData,
     Downloaded,
     Statistics,
-    NetworkInterfaces
+    NodeInfoData
 } from "./contracts";
 import { NotReadyError } from "./not-ready-error";
 import { ProtocolMetadataError } from "./errors";
@@ -93,7 +93,7 @@ interface ProtocolEvents {
     warning: (data: ProtocolEvent<Warning>) => this;
     workOrder: (data: ProtocolEvent<WorkOrder>) => this;
     statistics: (data: ProtocolEvent<Statistics>) => this;
-    networkData: (data: ProtocolEvent<NetworkInterfaces>) => this;
+    nodeInfoData: (data: ProtocolEvent<NodeInfoData>) => this;
 }
 
 const ProtocolEmitter: { new (): StrictEventEmitter<EventEmitter, ProtocolEvents> } = EventEmitter;
@@ -321,13 +321,13 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(metadata);
     }
 
-    public networkData(data: NetworkInterfaces): void {
+    public nodeSystemData(data: NodeInfoData): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
         }
 
-        const metadata: ProtocolEvent<NetworkInterfaces> = {
-            action: Action.NetworkData,
+        const metadata: ProtocolEvent<NodeInfoData> = {
+            action: Action.NodeSystemData,
             timestamp: Date.now(),
             data: data
         };
@@ -539,8 +539,8 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
             case Action.StorageData:
                 this.onStorageData(params as ProtocolEvent<StorageData>);
                 break;
-            case Action.NetworkData:
-                this.onNetworkData(params as ProtocolEvent<NetworkInterfaces>);
+            case Action.NodeSystemData:
+                this.onNodeSystemData(params as ProtocolEvent<NodeInfoData>);
                 break;
             case Action.SignedRequest:
                 this.onSignedRequest(params as ProtocolEvent<SignedRequest>);
@@ -688,8 +688,8 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.emit("storageData", params);
     }
 
-    protected onNetworkData(params: ProtocolEvent<NetworkInterfaces>): void {
-        this.emit("networkData", params);
+    protected onNodeSystemData(params: ProtocolEvent<NodeInfoData>): void {
+        this.emit("nodeInfoData", params);
     }
 
     protected onSignedRequest(params: ProtocolEvent<SignedRequest>): void {
