@@ -31,7 +31,9 @@ import {
     StorageData,
     Downloaded,
     Statistics,
-    NodeInfoData
+    NodeInfoData,
+    PingData,
+    NodesFromMaster
 } from "./contracts";
 import { NotReadyError } from "./not-ready-error";
 import { ProtocolMetadataError } from "./errors";
@@ -94,6 +96,8 @@ interface ProtocolEvents {
     workOrder: (data: ProtocolEvent<WorkOrder>) => this;
     statistics: (data: ProtocolEvent<Statistics>) => this;
     nodeInfoData: (data: ProtocolEvent<NodeInfoData>) => this;
+    pingData: (data: ProtocolEvent<PingData>) => this;
+    nodesFromMaster: (data: ProtocolEvent<NodesFromMaster>) => this;
 }
 
 const ProtocolEmitter: { new (): StrictEventEmitter<EventEmitter, ProtocolEvents> } = EventEmitter;
@@ -321,6 +325,19 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(metadata);
     }
 
+    public pingData(data: PingData): void {
+        if (!(this.state & State.Ready)) {
+            throw new NotReadyError();
+        }
+
+        const metadata: ProtocolEvent<PingData> = {
+            action: Action.PingData,
+            timestamp: Date.now(),
+            data: data
+        };
+        this.send(metadata);
+    }
+
     public nodeSystemData(data: NodeInfoData): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
@@ -491,6 +508,23 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
         this.send(stats);
     }
 
+    public nodesFromMaster(data: NodesFromMaster): void {
+        if (!(this.state & State.Ready)) {
+            throw new NotReadyError();
+        }
+
+        const nodes: ProtocolEvent<NodesFromMaster> = {
+            action: Action.NodesFromMaster,
+            data: {
+                ipv4: data.ipv4,
+                ipv6: data.ipv6,
+                port: data.port
+            },
+            timestamp: Date.now()
+        };
+        this.send(nodes);
+    }
+
     public requested(piece: number, infoHash: string): void {
         if (!(this.state & State.Ready)) {
             throw new NotReadyError();
@@ -577,6 +611,12 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
                 break;
             case Action.Response:
                 this.onResponse(params as ProtocolEvent<Response>);
+                break;
+            case Action.PingData:
+                this.onPingData(params as ProtocolEvent<PingData>);
+                break;
+            case Action.NodesFromMaster:
+                this.onNodesFromMaster(params as ProtocolEvent<NodesFromMaster>);
                 break;
             default:
                 debug(`Unknown action: ${params.action}`);
@@ -738,6 +778,14 @@ export class Wire<TLocalMetadata extends ClientMetadata, TRemoteMetadata extends
 
     protected onResponse(params: ProtocolEvent<Response>): void {
         this.emit("response", params);
+    }
+
+    protected onPingData(params: ProtocolEvent<PingData>): void {
+        this.emit("pingData", params);
+    }
+
+    protected onNodesFromMaster(params: ProtocolEvent<NodesFromMaster>): void {
+        this.emit("nodesFromMaster", params);
     }
 
     public isConnected(): boolean {

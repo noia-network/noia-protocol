@@ -12,7 +12,9 @@ import {
     BandwidthData,
     StorageData,
     Statistics,
-    NodeInfoData
+    NodeInfoData,
+    PingData,
+    NodesFromMaster
 } from "./contracts";
 import { Wire } from "./protocol";
 
@@ -335,6 +337,45 @@ describe("messages from node", () => {
             nodeWire.on("handshake", nodeHandshake);
             nodeWire.handshake().then(() => {
                 nodeWire.nodeSystemData(params);
+            });
+        });
+    });
+
+    test("pingData", done => {
+        const data: PingData = {
+            host: "192.168.0.1",
+            time: 1,
+            min: 1.0,
+            max: 1.0,
+            avg: 1.0
+        };
+
+        const masterHandshake = jest.fn();
+        const nodeHandshake = jest.fn();
+        expect.assertions(7);
+
+        TestsHelpers.connection(ws => {
+            const masterWire = new Wire(ws, defaultNodeMetadata);
+            masterWire.on("handshake", () => {
+                masterHandshake();
+                masterWire.pingData(data);
+            });
+        });
+
+        TestsHelpers.listen(() => {
+            const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
+            nodeWire.on("handshake", nodeHandshake);
+            nodeWire.handshake().then(() => {
+                nodeWire.on("pingData", info => {
+                    expect(nodeHandshake).toHaveBeenCalled();
+                    expect(masterHandshake).toHaveBeenCalled();
+                    expect(info.data.host).toBe(data.host);
+                    expect(info.data.min).toBe(data.min);
+                    expect(info.data.max).toBe(data.max);
+                    expect(info.data.avg).toBe(data.avg);
+                    expect(info.data.time).toBe(data.time);
+                    TestsHelpers.closeAll(done);
+                });
             });
         });
     });
@@ -694,6 +735,44 @@ describe("messages from master", () => {
                     expect(info.data.metadata.infoHash).toBe(metadata.metadata.infoHash);
                     expect(info.data.metadata.pieces).toBe(metadata.metadata.pieces);
                     expect(info.data.metadata.source).toBe(metadata.metadata.source);
+                    TestsHelpers.closeAll(done);
+                });
+            });
+        });
+    });
+
+    test("nodesFromMaster", done => {
+        const data: NodesFromMaster = {
+            ipv4: "8.8.8.8",
+            ipv6: "fe80::202:b3ff:fe1e:8329",
+            port: 8048
+        };
+
+        const masterHandshake = jest.fn();
+        const nodeHandshake = jest.fn();
+        expect.assertions(8);
+
+        TestsHelpers.connection(ws => {
+            const masterWire = new Wire(ws, defaultNodeMetadata);
+            masterWire.on("handshake", () => {
+                masterHandshake();
+                masterWire.nodesFromMaster(data);
+            });
+        });
+
+        TestsHelpers.listen(() => {
+            const nodeWire = new Wire(MASTER_ADDRESS, defaultNodeMetadata);
+            nodeWire.on("handshake", nodeHandshake);
+            nodeWire.handshake().then(() => {
+                nodeWire.on("nodesFromMaster", info => {
+                    expect(nodeHandshake).toHaveBeenCalled();
+                    expect(masterHandshake).toHaveBeenCalled();
+                    expect(info.action).toBe(Action.NodesFromMaster);
+                    expect(info.data.ipv4).toBe(data.ipv4);
+                    expect(info.data.ipv6).toBe(data.ipv6);
+                    expect(info.data.port).toBe(data.port);
+                    expect(info.timestamp).toBeLessThanOrEqual(Date.now());
+                    expect(info.timestamp).toBeGreaterThanOrEqual(START_TIMESTAMP);
                     TestsHelpers.closeAll(done);
                 });
             });

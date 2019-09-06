@@ -27,7 +27,9 @@ export enum Action {
     Warning = "warning",
     WorkOrder = "work-order",
     Statistics = "statistics",
-    NodeSystemData = "node-system-data"
+    NodeSystemData = "node-system-data",
+    PingData = "node-ping",
+    NodesFromMaster = "nodes-from-master"
 }
 
 export type ProtocolEventsTypes =
@@ -48,7 +50,9 @@ export type ProtocolEventsTypes =
     | Warning
     | WorkOrder
     | Statistics
-    | NodeInfoData;
+    | NodeInfoData
+    | PingData
+    | NodesFromMaster;
 
 export interface ProtocolEvent<TType extends ProtocolEventsTypes> {
     action: Action;
@@ -226,6 +230,12 @@ export interface Seed {
     };
 }
 
+export interface NodesFromMaster {
+    ipv4?: string;
+    ipv6?: string;
+    port: number | null;
+}
+
 export interface HandshakeFailed {
     reason: string;
 }
@@ -320,6 +330,14 @@ export interface ClosedData {
     wasClean: boolean;
     code: number;
     reason: string;
+}
+
+export interface PingData {
+    host?: string;
+    time: number;
+    min: number;
+    max: number;
+    avg: number;
 }
 
 export interface Requested {
