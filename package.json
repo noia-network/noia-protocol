@@ -41,7 +41,7 @@
         "@types/ws": "^6.0.0",
         "debug": "^3.1.0",
         "strict-event-emitter-types": "^2.0.0",
-        "systeminformation": "^4.12.2",
+        "systeminformation": "^5.3.1",
         "tslib": "^1.9.2",
         "ws": "^6.0.0"
     },
