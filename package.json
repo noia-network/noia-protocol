@@ -43,7 +43,7 @@
         "strict-event-emitter-types": "^2.0.0",
         "systeminformation": "^4.12.2",
         "tslib": "^1.9.2",
-        "ws": "^6.0.0"
+        "ws": "^7.4.5"
     },
     "files": [
         "dist",
